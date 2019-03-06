@@ -3,18 +3,21 @@
 
     Access the CAAQMS API via Python.
 """
+import base64
 import time
 import datetime
-import base64
+import dateutil.parser
 import requests
 
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Supress InsecureRequestWarning
 
-DATETIME_STRING_FORMAT = '%d %b %Y, %H:%M' # 05 Mar 2019, 23:15
-string_to_datetime = (lambda time_string: datetime.datetime.strptime(time_string, DATETIME_STRING_FORMAT))
-datetime_to_string = (lambda timestamp: timestamp.strftime(DATETIME_STRING_FORMAT))
+GET_STATION_PARAMETER_TIMESTAMP_FORMAT = '%d %b %Y, %H:%M' # 05 Mar 2019, 23:15
+GET_STATION_INFO_TIMESTAMP_FORMAT = '%d %b %Y %H:%M' # 05 Mar 2019 23:15
+
+string_to_datetime = (lambda time_string: dateutil.parser.parse(time_string))
+datetime_to_string = (lambda timestamp, format: timestamp.strftime(format))
 
 class PollutionAPI(object):
     """
@@ -164,7 +167,7 @@ class PollutionAPI(object):
         
         return stations
 
-    def get_station_data(self, station, *args, **kwargs):
+    def get_station_data(self, site_id, *args, **kwargs):
         """
         get station_data for a `site_id`
         
@@ -224,34 +227,44 @@ class Parameter(object):
             remark 
     """
     def __init__(self, *args, **kwargs):
-        self.parameter = kwargs.get('parameters')
+        self.name = kwargs.get('parameters')
         
-        try:
-            """ Transform date """
-            date = kwargs.get('date')
-            time = kwargs.get('time')
-            datetime_string = f'{date}, {time}'
-            self.date = string_to_datetime(datetime_string)
-        except:
-            pass
-            
-        try:
-            self.from_date = string_to_datetime(datetime_string)
-            self.to_date = string_to_datetime(datetime_to_string)
-        except:
-            pass
+        """ Transform date """
+        date = kwargs.get('date')
+        time = kwargs.get('time')
+        datetime_string = f'{date}, {time}'
+        self.date = string_to_datetime(datetime_string) or None
+        
+        from_date_string = kwargs.get('fromDate')
+        self.from_date = string_to_datetime(from_date_string) or None
+
+        to_date_string = kwargs.get('toDate')
+        self.to_date = string_to_datetime(to_date_string) or None
 
         self.concentration = kwargs.get('concentration', -1)
         self.unit = kwargs.get('unit', '')
-        self.avg_concentration = kwargs.get('Concentration_24Hr', -1)
+        avg_conc = kwargs.get('Concentration_24Hr', -1)
+        self.avg_concentration = avg_conc if type(avg_conc) == int else -1
         self.remark = kwargs.get('remark', '')
+
+    def get_dict(self):
+        return {
+            'name': self.name,
+            'date': self.date,
+            'from_date': self.from_date,
+            'to_date': self.to_date,
+            'concentration': self.concentration,
+            'unit': self.unit,
+            'avg_concentration': self.avg_concentration,
+            'remark': self.remark
+        }
 
     @property
     def value(self):
-        return f'{self.parameter} {self.unit}'
+        return f'{self.concentration} {self.unit}'
 
-    def __str__(self, *args, **kwargs):
-        return f"<Parameter {self.parameter} {self.concentration}{self.unit}>"
+    def __repr__(self, *args, **kwargs):
+        return f"<Parameter {self.name} {self.concentration}{self.unit}>"
 
 
 class Station(object):
@@ -271,9 +284,11 @@ class Station(object):
     """
     def __init__(self, *args, **kwargs):
         self.station_name = kwargs.get('station_name', 'N/A')
-        self.station_id = kwargs.get('station_id', -1)
+        self.station_id = kwargs.get('station_id', 'site_-1')
         self.address = kwargs.get('address', 'N/A')
-        self.time_stamp = kwargs.get('time_stamp', datetime.datetime.utcnow())
+
+        time_stamp_string = kwargs.get('time_stamp', datetime.datetime.utcnow())
+        self.time_stamp = string_to_datetime(time_stamp_string)
         
         parameters_list = kwargs.get('parameters', [])
         self.parameters = [Parameter(**parameter_dict) for parameter_dict in parameters_list ]
@@ -283,7 +298,18 @@ class Station(object):
         self.latitude = kwargs.get('latitude', '')
         self.longitude = kwargs.get('longitude', '')
 
-    def __str__(self, *args, **kwargs):
+    def get_dict(self):
+        return {
+            'station_name': self.station_name,
+            'station_id': self.station_id,
+            'address': self.address,
+            'time_stamp': self.time_stamp,
+            'status': self.status,
+            'latitude': self.latitude,
+            'longitude': self.longitude
+        }
+
+    def __repr__(self, *args, **kwargs):
         return f"<Station {self.station_name} {self.station_id}>"
 
 def get_station(json_data, *args, **kwargs):
@@ -302,39 +328,33 @@ def get_station(json_data, *args, **kwargs):
     station = Station(**station_data)
     return station
     
-
 if __name__ == '__main__':
     api = PollutionAPI()
     stations = api.get_all_stations()
-    station_data_list = []
+    station_list = []
 
     start = time.time()
     for station in stations:
-        print()
         print(f"Collecting data for {station['station_id']}")
         start = time.time()
         data = api.get_station_data(station['station_id'])
-        station_data_list.append(data)
 
         station_instance = get_station(data)
+        station_list.append(station_instance)
         print(station_instance)
-        print([str(param) for param in station_instance.parameters])
+        print(station_instance.parameters[0].__dict__)
+        printer(**station_instance.get_dict())
 
         end = time.time() - start
         print(f"Time taken: {end}")
+        break
 
     end = time.time() - start
     print(f"Total Time Taken: {end}")    
     
     
-    first_site_id = stations[0]['station_id']
-    print(first_site_id)
-    
-    first_station_data = api.get_station_data(first_site_id)
-    print(first_station_data)
-
-    for pollutant in first_station_data['parameters']:
-        print(f'''---- {pollutant['parameters']} ----''')
-        print(f'''     {pollutant['date']}           ''')
-        print(f'''Concentration: {pollutant['concentration']}{pollutant['unit']}''')
+    for pollutant in station_list[0].parameters:
+        print(f'''---- {pollutant.parameter} ----''')
+        print(f'''     {pollutant.date}           ''')
+        print(f'''Concentration: {pollutant.value}''')
         print('''-----------------------------------''')
