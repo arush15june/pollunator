@@ -44,7 +44,9 @@ class AllStationsResource(Resource):
         return stations_json       
 
 class StationResource(Resource):
-
+    """
+    get data for a single stations.
+    """
     def get(self, station_id):
         """
             Fetch required station via station_id matched by route,

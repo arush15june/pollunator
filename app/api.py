@@ -7,6 +7,7 @@ import base64
 import time
 import datetime
 import dateutil.parser
+import dateutil.tz as tz
 import requests
 
 import urllib3
@@ -16,7 +17,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 GET_STATION_PARAMETER_TIMESTAMP_FORMAT = '%d %b %Y, %H:%M' # 05 Mar 2019, 23:15
 GET_STATION_INFO_TIMESTAMP_FORMAT = '%d %b %Y %H:%M' # 05 Mar 2019 23:15
 
-string_to_datetime = (lambda time_string: dateutil.parser.parse(time_string))
+string_to_datetime = (lambda time_string: dateutil.parser.parse(time_string).replace(tzinfo=tz.gettz('Asia/Kolkata')) )
 datetime_to_string = (lambda timestamp, format: timestamp.strftime(format))
 
 class PollutionAPI(object):

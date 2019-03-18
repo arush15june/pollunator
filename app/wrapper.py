@@ -2,6 +2,7 @@
     Wrapper for PollutionAPI
 """
 import models
+import datetime
 from database import init_db, db_session
 from api import PollutionAPI, Station, Parameter, get_station, string_to_datetime
 
@@ -52,6 +53,8 @@ class PollutionAPIWrapper():
                 - Try getting a station from the database
                 - Add data which can only be found in api.get_station_data
                   if its not there
+                - Check if data is older than 30 minutes,
+                  update if it is.
                 - Update station based on UPDATE_STATION
                     - fetch latest station data
                     - update address, time_stamp, status
@@ -77,8 +80,15 @@ class PollutionAPIWrapper():
         if station.address == 'N/A':
             UPDATE_STATION = True
 
+        station_timestamp_30min_delta = station.time_stamp - datetime.timedelta(minutes=30) 
+        current_time_delta = datetime.datetime.utcnow() - datetime.timedelta(minutes=30)
+
+        if current_time_delta > station_timestamp_30min_delta :
+            UPDATE_STATION = True
+
         # Fetch New Data
         if UPDATE_STATION:
+            print("UPDATING STATION")
             station_data = self.api.get_station_data(station_id)
             station_instance = get_station(station_data)
         
