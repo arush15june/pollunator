@@ -88,7 +88,6 @@ class PollutionAPIWrapper():
 
         # Fetch New Data
         if UPDATE_STATION:
-            print("UPDATING STATION")
             station_data = self.api.get_station_data(station_id)
             station_instance = get_station(station_data)
         
