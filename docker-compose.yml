@@ -5,7 +5,7 @@ services:
       context: .
     working_dir: /deploy/app
     volumes:
-      - './app/stations.db:/deploy/app/stations.db'
+      - './app/:/deploy/app/'
     networks:
       - web_nw
   nginx:
