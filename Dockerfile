@@ -8,4 +8,4 @@ COPY app /deploy/app
 
 WORKDIR /deploy/app
 
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["/deploy/app/entrypoint.sh"]
