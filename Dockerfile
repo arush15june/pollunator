@@ -5,7 +5,6 @@ RUN pip3 install -r /deploy/app/requirements.txt
 RUN pip3 install gunicorn
 
 COPY app /deploy/app
-COPY entrypoint.sh /deploy/app
 
 WORKDIR /deploy/app
 
