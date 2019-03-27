@@ -28,7 +28,7 @@ class Station extends Component {
               <Card.Body>
                 <Card.Title>{station_data.status}</Card.Title>
                 <Card.Text>
-                  Latitude: {station_data.latitude} Longitude: {station_data.longitude}
+                  Latitude: {station_data.latitude} Longitude: {station_data.longitude} Timestamp: {station_data.parameters.date}
                 </Card.Text>
                 <Card.Text>
                   {this.parameterList()}
