@@ -12,6 +12,7 @@ services:
     image: "nginx:mainline"
     volumes:
       - $PWD/conf.d:/etc/nginx/conf.d
+      - $PWD/docs/build:/var/www/html/static
     environment:
       - net.ipv6.conf.all.forwarding=1 
     ports:
