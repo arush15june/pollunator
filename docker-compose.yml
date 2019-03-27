@@ -6,3 +6,18 @@ services:
     working_dir: /deploy/app
     ports:
       - "8000:8000"
+  nginx:
+    image: "nginx:mainline"
+    volumes:
+      - $PWD/conf.d:/etc/nginx/conf.d
+    environment:
+      - net.ipv6.conf.all.forwarding=1 
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+    networks:
+      - web_nw
+networks:
+  web_nw:
+    driver: bridge
