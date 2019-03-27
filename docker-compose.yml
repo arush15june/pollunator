@@ -6,7 +6,6 @@ services:
     working_dir: /deploy/app
     ports:
       - "8000:8000"
-    entrypoint: /deploy/app/populate.sh
   nginx:
     image: "nginx:mainline"
     volumes:

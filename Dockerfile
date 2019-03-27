@@ -5,8 +5,8 @@ RUN pip3 install -r /deploy/app/requirements.txt
 RUN pip3 install gunicorn
 
 COPY app /deploy/app
-COPY populate.sh /deploy/app
+COPY entrypoint.sh /deploy/app
 
 WORKDIR /deploy/app
-# Start gunicorn
-CMD ["gunicorn","-w", "4", "-b", "0.0.0.0:8000", "application:app"]
+
+ENTRYPOINT ["entrypoint.sh"]
