@@ -46,10 +46,11 @@ class StationsContainer extends Component {
       this.setState({
         coords: pos
       })
+      this.setStationOnEuclideanDistance()
     }
     
     if (geolocation) { 
-      geolocation.getCurrentPosition(setCoordState)
+      await geolocation.getCurrentPosition(setCoordState)
     }
   }
 
@@ -127,12 +128,11 @@ class StationsContainer extends Component {
   }
   
   async componentDidMount() {
-    await this.setUserCoordinates()
     await this.fetchStations()
     await this.setSelectedStationFromIndex(0)
-    await this.setStationOnEuclideanDistance()
+    this.setUserCoordinates()
   }
-
+  
   render() {
     return (
       <React.Fragment>
