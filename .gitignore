@@ -1,0 +1,6 @@
+.vscode
+env/
+*.pyc
+private_key.pem
+public_key.pem
+stations.db
