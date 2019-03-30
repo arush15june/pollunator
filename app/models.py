@@ -109,3 +109,34 @@ class Station(Base):
 
     def __repr__(self):
         return f'<Station {self.station_id} {self.station_name}>'
+
+DEFAULT_NOTIF_TIME = datetime.time(hour=9)
+
+class Subscriber(Base):
+    """
+    Store subscription info: endpoint, key info, user email, notification time
+
+    :param str email: user email.
+    :param str endpoint: WebPush endpoint.
+    :param str dh_param: WebPush ECDH parameter.
+    :param str auth: WebPush Auth key.
+    :param datetime notify_time: Notify user at this time daily.
+
+    """
+    __tablename__ = 'subscriptions'
+    id = Column(Integer(), primary_key=True)
+    email = Column(String(150), unique=True)
+    endpoint = Column(String(256), nullable=False)
+    dh_param = Column(String(256), nullable=False)
+    auth = Column(String(256), nullable=False)
+    notify_time = Column(DateTime())
+
+    @property
+    def subscription_info(self):
+        return {
+            'endpoint': self.endpoint,
+            'keys': {
+                'p256dh': self.dh_param,
+                'auth': self.auth
+            }
+        }

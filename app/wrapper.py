@@ -83,7 +83,7 @@ class PollutionAPIWrapper():
         station_timestamp_30min_delta = station.time_stamp - datetime.timedelta(minutes=30) 
         current_time_delta = datetime.datetime.utcnow() - datetime.timedelta(minutes=30)
 
-        if current_time_delta > station_timestamp_30min_delta :
+        if current_time_delta > station_timestamp_30min_delta:
             UPDATE_STATION = True
 
         # Fetch New Data

@@ -7,10 +7,14 @@
 from flask import Flask, request, make_response
 from flask_restful import Resource, Api, reqparse, abort
 from flask_cors import CORS
+import dateutil
 
 from wrapper import PollutionAPIWrapper
 from database import init_db, db_session
+
 import models
+import pusher
+import subscriber
 
 app = Flask(__name__)
 
@@ -45,8 +49,9 @@ class AllStationsResource(Resource):
 
 class StationResource(Resource):
     """
-    get data for a single stations.
+    serve data for a single station.
     """
+
     def get(self, station_id):
         """
             Fetch required station via station_id matched by route,
@@ -71,8 +76,72 @@ class StationResource(Resource):
 
         return station_json
 
+class PushNotificationResource(Resource):
+    """
+    Handle new Subscribers for notifications.
+    """
+    root_post_parser = reqparse.RequestParser()
+    root_post_parser.add_argument('email', location='json')
+    root_post_parser.add_argument('notify_time', location='json')
+    root_post_parser.add_argument('subscription_info', type=dict, location='json')
+    
+
+    subscription_info_parser = reqparse.RequestParser()
+    subscription_info_parser.add_argument('endpoint', location=('subscription_info',))
+    subscription_info_parser.add_argument('keys', type='dict', location=('subscription_info',))
+
+    key_arg_parser = reqparse.RequestParser()
+    key_arg_parser.add_argument('p256dh', location=('keys',))
+    key_arg_parser.add_argument('auth', location=('keys',))
+
+    def post(self):
+        """
+            receive subscription parameters and other data,
+            add to database,
+            setup background job to send notifications
+            return response or error
+        """
+        root_args = root_post_parser.parse_args() 
+        subscription_args = subscription_info_parser.parse_args(req=root_args)
+        key_args = key_arg_parser.parse_args(req=subscription_args)
+
+        email = root_args['email']
+
+        sub = subscriber.get_subscriber(email=email)
+        if not sub[0]:
+            return {
+                'error': 'Subscription already exists for this email'
+            }   
+
+        notify_time = root_args['notify_time']
+
+        endpoint = subscription_args['endpoint']
+        
+        p256dh = key_args['p256dh']
+        auth = key_args['auth']
+        
+        data = {
+            'email': email,
+            'notify_time': notify_time_str,
+            'endpoint': endpoint,
+            'p256dh': p256dh,
+            'auth': auth
+        }
+
+        subscriber.add_subscriber(**data)
+
+        return {
+            'email': subscriber.email,
+            'notify_time': subscriber.notify_time.strftime('%H:%M')
+        }
+        
 api.add_resource(AllStationsResource, '/api/stations')
 api.add_resource(StationResource, '/api/stations/<string:station_id>' )
+api.add_resource(PushNotificationResource, '/api/subscribe')
+
+@app.route('/publickey', methods=['GET'])
+def vapid_public_key():
+    return pusher.Pusher.APP_SERVER_KEY
 
 if __name__ == "__main__":
     init_db()

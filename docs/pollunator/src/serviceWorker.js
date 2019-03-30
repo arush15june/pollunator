@@ -10,51 +10,6 @@
 // To learn more about the benefits of this model and instructions on how to
 // opt-in, read https://bit.ly/CRA-PWA
 
-const API_URL = 'localhost:5000'
-const PUBLIC_KEY_URI = `${API_URL}/publickey`
-
-function urlBase64ToUint8Array(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/\-/g, '+')
-    .replace(/_/g, '/')
-  ;
-  const rawData = window.atob(base64);
-  return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
-}
-
-async function getPublicKeyArray() {
-  const response = await fetch(PUBLIC_KEY_URI)
-  const key = await response.text()
-
-  return urlBase64ToUint8Array(key)
-}
-
-async function askPermission() {
-  return new Promise((resolve, reject) => {
-    const permissionResult = Notification.requestPermission((result) => {
-      resolve(result)
-    })
-    if (permissionResult) {
-      permissionResult.then(resolve, reject)
-    }
-  })
-  .then((permissionResult) => {
-    if (permissionResult !== 'granted') {
-      throw new Error('Permission denied')
-    }
-  })
-}
-
-async function subscribe() {
-  navigator.serviceWorker.ready.then(registration => {
-    askPermission().then(() => {
-      const public_key = getPublicKeyArray()
-      
-    })
-  });
-}
-
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost' ||
     // [::1] is the IPv6 localhost address.
@@ -128,7 +83,7 @@ function registerValidSW(swUrl, config) {
               // It's the perfect time to display a
               // "Content is cached for offline use." message.
               console.log('Content is cached for offline use.');
-
+              
               // Execute callback
               if (config && config.onSuccess) {
                 config.onSuccess(registration);
