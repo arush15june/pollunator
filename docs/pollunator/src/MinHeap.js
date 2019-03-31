@@ -7,7 +7,7 @@ class MinHeap {
     
     insert(value){
         if(this.heapSize+1 === this.heap.length){
-            throw "Overflow Size"
+            throw Error("Overflow Size")
         }
         this.heap[this.heapSize + 1] = value
         this.heapSize = this.heapSize + 1
@@ -26,7 +26,7 @@ class MinHeap {
         let rc = 2*index + 2
         if(rc<=n-1 && this.getValue(this.heap[lc]) < this.getValue(this.heap[minIndex]) ) minIndex=rc
 
-        if(minIndex != index){
+        if(minIndex !== index){
             this.swap(index,minIndex)
             this.siftDown(minIndex)
         }
