@@ -13,8 +13,8 @@ from wrapper import PollutionAPIWrapper
 from database import init_db, db_session
 
 import models
-import pusher
-import subscriber
+from pusher import Pusher
+from subscriber import get_subscriber, add_subscriber
 
 app = Flask(__name__)
 
@@ -81,18 +81,18 @@ class PushNotificationResource(Resource):
     Handle new Subscribers for notifications.
     """
     root_post_parser = reqparse.RequestParser()
+    root_post_parser.add_argument('station_id', location='json')
     root_post_parser.add_argument('email', location='json')
     root_post_parser.add_argument('notify_time', location='json')
-    root_post_parser.add_argument('subscription_info', type=dict, location='json')
+    root_post_parser.add_argument('subscription', type=dict, location='json')
     
+    # subscription_info_parser = reqparse.RequestParser()
+    # subscription_info_parser.add_argument('endpoint', location=('subscription',) )
+    # subscription_info_parser.add_argument('keys', type='dict', location=('subscription',))
 
-    subscription_info_parser = reqparse.RequestParser()
-    subscription_info_parser.add_argument('endpoint', location=('subscription_info',))
-    subscription_info_parser.add_argument('keys', type='dict', location=('subscription_info',))
-
-    key_arg_parser = reqparse.RequestParser()
-    key_arg_parser.add_argument('p256dh', location=('keys',))
-    key_arg_parser.add_argument('auth', location=('keys',))
+    # key_arg_parser = reqparse.RequestParser()
+    # key_arg_parser.add_argument('p256dh', location=('keys',))
+    # key_arg_parser.add_argument('auth', location=('keys',))
 
     def post(self):
         """
@@ -101,26 +101,36 @@ class PushNotificationResource(Resource):
             setup background job to send notifications
             return response or error
         """
-        root_args = root_post_parser.parse_args() 
-        subscription_args = subscription_info_parser.parse_args(req=root_args)
-        key_args = key_arg_parser.parse_args(req=subscription_args)
+        root_args = self.root_post_parser.parse_args() 
+        # subscription_args = self.subscription_info_parser.parse_args(req=root_args)
+        # key_args = self.key_arg_parser.parse_args(req=subscription_args)
 
+        station_id = root_args['station_id']
         email = root_args['email']
+        notify_time_str = root_args['notify_time']
+        subscription = root_args['subscription']
+        endpoint = subscription['endpoint']
+        p256dh = subscription['keys']['p256dh']
+        auth = subscription['keys']['auth']
 
-        sub = subscriber.get_subscriber(email=email)
-        if not sub[0]:
-            return {
-                'error': 'Subscription already exists for this email'
-            }   
+        # endpoint = subscription_args['endpoint']
 
-        notify_time = root_args['notify_time']
+        print(station_id, email, notify_time_str, subscription)
 
-        endpoint = subscription_args['endpoint']
+        sub_endpoint = get_subscriber(endpoint=endpoint)
+        sub_email = get_subscriber(email=email)
         
-        p256dh = key_args['p256dh']
-        auth = key_args['auth']
+        if sub_endpoint.count() > 0:
+            return {
+                'error': 'Subscription already exists for this device.'
+            }, 400
+        elif sub_email.count() > 0:
+            return {
+                'error': 'Subscription already exists for this email.'
+            }, 400
         
         data = {
+            'station_id': station_id,
             'email': email,
             'notify_time': notify_time_str,
             'endpoint': endpoint,
@@ -128,20 +138,21 @@ class PushNotificationResource(Resource):
             'auth': auth
         }
 
-        subscriber.add_subscriber(**data)
+        subscriber = add_subscriber(**data)
 
         return {
-            'email': subscriber.email,
+            'station_id': subscriber.station_id, 
+            'email': email,
             'notify_time': subscriber.notify_time.strftime('%H:%M')
         }
-        
+
 api.add_resource(AllStationsResource, '/api/stations')
 api.add_resource(StationResource, '/api/stations/<string:station_id>' )
 api.add_resource(PushNotificationResource, '/api/subscribe')
 
-@app.route('/publickey', methods=['GET'])
+@app.route('/api/publickey', methods=['GET'])
 def vapid_public_key():
-    return pusher.Pusher.APP_SERVER_KEY
+    return Pusher.APP_SERVER_KEY
 
 if __name__ == "__main__":
     init_db()

@@ -32,6 +32,8 @@ class Pusher(object):
     PUBLIC_KEY_PATH = os.getenv('PUBLIC_KEY_PATH', DEFAULT_PUBLIC_KEY_PATH)
     PUSH_CLAIMS_EMAIL = os.getenv('PUSH_CLAIMS_EMAIL', DEFAULT_PUSH_CLAIMS_EMAIL)
     CLAIMS_SUB_STRING = f'mailto:{PUSH_CLAIMS_EMAIL}'
+    NOTIF_TITLE = os.getenv('NOTIF_TITLE', DEFAULT_NOTIF_TILE)
+    NOTIF_BODY = os.getenv('NOTIF_BODY', DEFAULT_NOTIF_BODY)
     
     def _create_notification_dict(self, *args, **kwargs):
         title = kwargs.pop('title', self.NOTIF_TITLE)
@@ -49,8 +51,11 @@ class Pusher(object):
             kwargs
         )
 
+        return notif_dict
+
     @staticmethod
     def _serialize(data):
+        print(data)
         return json.dumps(data)
 
     def _send_payload(self, subscription_info, serialized_payload):
@@ -61,18 +66,17 @@ class Pusher(object):
                     { "endpoint": "...", "keys": {"p256dh": "..", "auth": ".."} }
         :param str serialized_payload: payload to send via push message, serialize data  
         """
-        content_type = 'aes128gcm'
+        print(serialized_payload)
         webpush(
             subscription_info,
             data=serialized_payload,
             vapid_private_key=self.PRIVATE_KEY_PATH,
-            content_type=content_type,
             vapid_claims={
                 'sub': self.CLAIMS_SUB_STRING
             }
         )
 
-    def send_notification(subscription_info, *args, **kwargs):
+    def send_notification(self, subscription_info, *args, **kwargs):
         """
             send a notification to subscriber via subscription_info
 
@@ -82,6 +86,8 @@ class Pusher(object):
 
         """
         notification_dict = self._create_notification_dict(**kwargs)
+        print(notification_dict)
         payload = self._serialize(notification_dict)
+        print(payload)
 
-        self._send_payload(notification_dict, payload)
+        self._send_payload(subscription_info, payload)
