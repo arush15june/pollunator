@@ -1,4 +1,4 @@
-FROM python:3.7.2
+FROM python:3.7.3-alpine3.9
 
 COPY ./requirements.txt /deploy/app/
 RUN pip3 install -r /deploy/app/requirements.txt
