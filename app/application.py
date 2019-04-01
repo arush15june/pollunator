@@ -159,4 +159,4 @@ if __name__ == "__main__":
     if models.Station.query.count() == 0:
         print('** Populating Stations')
         api_handler.populate_stations()
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')

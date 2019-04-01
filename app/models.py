@@ -125,7 +125,7 @@ class Subscriber(Base):
     """
     __tablename__ = 'subscriptions'
     id = Column(Integer(), primary_key=True)
-    station_id = Column(String(20), unique=True)
+    station_id = Column(String(20))
     email = Column(String(150), unique=True)
     endpoint = Column(String(256), nullable=False)
     dh_param = Column(String(256), nullable=False)
