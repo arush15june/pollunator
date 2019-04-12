@@ -95,11 +95,11 @@ class StationsContainer extends Component {
       this.setState({
         selectedStation: {}
       })
-      await this.setSelectedStationFromStation(mh.heap[0])
-
+      
       this.setState({
         stationList: mh.heap
       })
+      await this.setSelectedStationFromStation(mh.heap[0])
     }
   }
   
@@ -128,8 +128,8 @@ class StationsContainer extends Component {
   
   async componentDidMount() {
     await this.fetchStations()
-    await this.setSelectedStationFromIndex(0)
     this.setUserCoordinates()
+    await this.setSelectedStationFromIndex(0)
   }
   
   render() {
