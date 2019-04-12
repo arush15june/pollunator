@@ -115,7 +115,7 @@ class StationsContainer extends Component {
 
   async setSelectedStationFromStation(station) {
     let selectedStationData = await this.fetchStationData(station.station_id)
-
+    
     this.setState({
       selectedStation: selectedStationData
     })

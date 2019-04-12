@@ -134,6 +134,9 @@ class Subscriber(Base):
     job_set = Column(Boolean(), default=False)
     add_time = Column(DateTime(), default=datetime.datetime.utcnow)
 
+    def __repr__(self):
+        return f'<Subscriber {self.email} {self.station_id}>'
+
     @property
     def subscription_info(self):
         return {

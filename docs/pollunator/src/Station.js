@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import Card from 'react-bootstrap/Card'
+import CardColumns from 'react-bootstrap/CardColumns'
 
 import Subscriber from './Subscriber'
+import Parameter from './Parameter'
 
 function isEmpty(obj) {
   return Object.keys(obj).length === 0;
@@ -12,7 +14,7 @@ class Station extends Component {
     _parameter_list() {
       const parameters = this.props.stationData.parameters.parameters
       const param_list = parameters.map(param => {
-        return <p>{param.name}: <span className='font-weight-bold'>{param.value}</span> {param.date}</p>
+        return <Parameter parameterData={param} />
       })
 
       return param_list      
@@ -31,9 +33,9 @@ class Station extends Component {
                 <Card.Text>
                   Latitude: {station_data.latitude} Longitude: {station_data.longitude} Timestamp: {station_data.parameters.date}
                 </Card.Text>
-                <Card.Text>
+                <CardColumns>
                   {this._parameter_list()}
-                </Card.Text>
+                </CardColumns>
                 <Card.Text>
                   <Subscriber station_id={this.props.stationData.station_id} />
                 </Card.Text>
