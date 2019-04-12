@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/precache-manifest.3210101378c66ccd2355672fb4aa51ba.js"
+  "/precache-manifest.64a319609f14bc91aa474f67910eb51d.js"
 );
 
 workbox.clientsClaim();
@@ -38,6 +38,6 @@ self.addEventListener('push', (event) => {
   const title = push_message.title
   console.log(push_message)
   const promiseChain = self.registration.showNotification(title, push_message.options)
-  // const notification = new Notification(title, options)
+  
   event.waitUntil(promiseChain)
 })
