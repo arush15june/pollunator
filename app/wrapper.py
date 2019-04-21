@@ -6,6 +6,9 @@ import datetime
 from database import init_db, db_session
 from api import PollutionAPI, Station, Parameter, get_station, string_to_datetime
 
+class StationPopulationError(Exception):
+    pass
+
 class PollutionAPIWrapper():
     """
         Wrapper for PollutionAPI
@@ -36,8 +39,16 @@ class PollutionAPIWrapper():
             station_db_instance = models.Station(**station_data)
             db_session.add(station_db_instance)
         
-        db_session.commit()
-
+        # Rollback if commit fails
+        try:
+            db_session.commit()
+        except:
+            db_session.rollback()
+            raise StationPopulationError()
+            
+    class StationUpdateError(Exception):
+        pass
+            
     def get_station(self, *args, **kwargs):
         """
             Get station data via
@@ -102,7 +113,11 @@ class PollutionAPIWrapper():
             
             station.parameters.append(parameter_list)
 
-            # Commit to database
-            db_session.commit()
+            # Commit to database, Rollback if commit fails
+            try:
+                db_session.commit()
+            except:
+                db_session.rollback()
+                raise StationUpdateError()
 
         return station

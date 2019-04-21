@@ -9,6 +9,9 @@ from pusher import Pusher
 def get_subscriber(*args, **kwargs):
     return Subscriber.query.filter_by(**kwargs)
 
+class InvalidSubscriberInputError(Exception):
+    pass
+
 def add_subscriber(*args, **kwargs):
     """
         add subscriber to datbase and job queue
@@ -27,7 +30,13 @@ def add_subscriber(*args, **kwargs):
 
     subscriber = Subscriber(**subscriber_dict)
     db_session.add(subscriber)
-    db_session.commit()
+
+    # Commit to database, rollback if commit fails
+    try:
+        db_session.commit()
+    except:
+        db_session.rollback()
+        raise InvalidSubscriberInputError()
 
     set_notification_job(subscriber)
 
