@@ -126,8 +126,8 @@ async setSelectedStationFromIndex(index) {
 
 async componentDidMount() {
   await this.fetchStations()
-  await this.setUserCoordinates()
   await this.setSelectedStationFromIndex(0)
+  await this.setUserCoordinates()
 }
 
 render() {
