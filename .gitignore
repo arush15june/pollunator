@@ -5,3 +5,4 @@ env-linux/
 private_key.pem
 public_key.pem
 stations.db
+deploy.sh
