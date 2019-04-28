@@ -1,5 +1,6 @@
 .vscode
 env/
+env-linux/
 *.pyc
 private_key.pem
 public_key.pem

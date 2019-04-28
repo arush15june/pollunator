@@ -1,7 +1,3 @@
-import os
-import json
-from pywebpush import webpush, WebPushException
-
 """
     pusher
     module to handle WebPush subscriptions
@@ -13,6 +9,11 @@ from pywebpush import webpush, WebPushException
     vapid --applicationServerKey
     generates application server key for frontend
 """
+
+import os
+import json
+from pywebpush import webpush, WebPushException
+
 
 DEFAULT_APP_SERVER_KEY = 'BCj6Yxzs5j-zKTzHIrWAAczNCyc_iHht8u_p4Rqw53nOVIebj6a_rIDRBC7Zkj6WpOsr8s8yj8Gg60jjWOu8UqM'
 DEFAULT_PRIVATE_KEY_PATH = './private_key.pem'

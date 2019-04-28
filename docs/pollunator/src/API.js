@@ -1,4 +1,4 @@
-const URL = ''
+const URL = 'http://localhost:5000'
 const STATIONS_URI = '/api/stations'
 const PUBLIC_KEY_URI = '/api/publickey'
 const SUBSCRIBE_URI = '/api/subscribe'
