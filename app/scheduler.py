@@ -36,7 +36,7 @@ def schedule_subscriber_hourly(subscriber, hours=24, *args, **kwargs):
         scheduled_time=job_time, # Time for first execution, in UTC timezone
         func=send_notification,                     # Function to be queued
         args=[subscriber],             # Arguments passed into function when executed
-        kwargs=notification_data         # Keyword arguments passed into function when executed
+        kwargs=notification_data,         # Keyword arguments passed into function when executed
         interval=60,                   # Time before the function is called again, in seconds
         repeat=None                   # Repeat this number of times (None means repeat forever)
     )
