@@ -127,12 +127,12 @@ class PollutionAPI(object):
 
     """
     URL = 'https://app.cpcbccr.com'
-    
+
     ALL_STATIONS_URI = {
         'URI': '/caaqms/caaqms_landing_map_all',
-        'POST_DATA': 'eyJyZWdpb24iOiJsYW5kaW5nX2Rhc2hib2FyZCJ9' 
+        'POST_DATA': 'eyJyZWdpb24iOiJsYW5kaW5nX2Rhc2hib2FyZCJ9'
     }
-    
+
     STATION_VIEW_DATA_URI = {
         'URI': '/caaqms/caaqms_viewdata_v2',
         'POST_DATA': (lambda site_id: base64.b64encode(f'''{{"site_id":"{site_id}","user_id":"user_211","user_name":"KSPCB","user_role":"Admin","org":["KSPCB"]}}'''.encode()).decode())
@@ -165,13 +165,13 @@ class PollutionAPI(object):
         stations = json_data['map']['station_list']
 
         self.stations = stations
-        
+
         return stations
 
     def get_station_data(self, site_id, *args, **kwargs):
         """
         get station_data for a `site_id`
-        
+
         return dict site_data: {
             'site_data': <site information>,
             'parameters': <parameters>
@@ -184,7 +184,7 @@ class PollutionAPI(object):
 
         site_info_key = 'siteInfo'
         table_data_key = 'tableData'
-        body_content_key = 'bodyContent'    
+        body_content_key = 'bodyContent'
 
         site_data = {
             'site_data': json_data[site_info_key],
@@ -192,7 +192,7 @@ class PollutionAPI(object):
         }
 
         return site_data
-    
+
     # def get_station_delta(self, site_id, delta, time_stamp, *args, **kwargs):
     #     """
     #         get historical data based on delta.
@@ -204,7 +204,7 @@ class PollutionAPI(object):
 
     #     site_info_key = 'siteInfo'
     #     table_data_key = 'tableData'
-    #     body_content_key = 'bodyContent'    
+    #     body_content_key = 'bodyContent'
 
     #     site_data = {
     #         'site_data': json_data[site_info_key],
@@ -217,7 +217,7 @@ class Parameter(object):
     """
         Container for parameter
         Data:
-            parameters 
+            parameters
             date
             time
             from_date
@@ -225,17 +225,17 @@ class Parameter(object):
             concentration
             unit
             Concentration_24Hr
-            remark 
+            remark
     """
     def __init__(self, *args, **kwargs):
         self.name = kwargs.get('parameters')
-        
+
         """ Transform date """
         date = kwargs.get('date')
         time = kwargs.get('time')
         datetime_string = f'{date}, {time}'
         self.date = string_to_datetime(datetime_string) or None
-        
+
         from_date_string = kwargs.get('fromDate')
         self.from_date = string_to_datetime(from_date_string) or None
 
@@ -290,12 +290,12 @@ class Station(object):
 
         time_stamp_string = kwargs.get('time_stamp', datetime.datetime.utcnow())
         self.time_stamp = string_to_datetime(time_stamp_string)
-        
+
         parameters_list = kwargs.get('parameters', [])
         self.parameters = [Parameter(**parameter_dict) for parameter_dict in parameters_list ]
 
         self.status = kwargs.get('status', 'N/A')
-        
+
         self.latitude = kwargs.get('latitude', '')
         self.longitude = kwargs.get('longitude', '')
 
@@ -328,7 +328,7 @@ def get_station(json_data, *args, **kwargs):
 
     station = Station(**station_data)
     return station
-    
+
 if __name__ == '__main__':
     api = PollutionAPI()
     stations = api.get_all_stations()
@@ -351,9 +351,9 @@ if __name__ == '__main__':
         break
 
     end = time.time() - start
-    print(f"Total Time Taken: {end}")    
-    
-    
+    print(f"Total Time Taken: {end}")
+
+
     for pollutant in station_list[0].parameters:
         print(f'''---- {pollutant.parameter} ----''')
         print(f'''     {pollutant.date}           ''')

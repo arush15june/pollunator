@@ -6,7 +6,7 @@ from database import Base
 class Parameter(Base):
     """
         Hold a single parameter and its information
-        
+
         :param str name: name of parameter
         :param datetime date: date related to parameter
         :param datetime from_date: parameter valid from datetime
@@ -37,7 +37,7 @@ class Parameter(Base):
 class ParameterList(Base):
     """
         Holds a list of parameters
-        
+
         :param datetime create_date: when the parameter list was created
         :param datetime parameter_date:  date related to the parameters
         :param list<Parameter> parmaters: list of parameters
@@ -53,8 +53,8 @@ class ParameterList(Base):
     def serialize(self):
         return {
             'date': str(self.parameter_date),
-            'parameters': [ 
-                { 
+            'parameters': [
+                {
                     'name': param.name,
                     'concentration': param.concentration,
                     'unit': param.unit,
@@ -62,9 +62,17 @@ class ParameterList(Base):
                     'avg_concentration': param.avg_concentration,
                     'value': param.value
                 }
-                    for param in self.parameters 
+                    for param in self.parameters
                 ]
         }
+
+    def get_param(self, param_name):
+        """
+            Find param_name in parameters or return None
+
+            :return param models.Parameter
+        """
+        return next(filter(self.parameters, lambda param: param.name == param_name), None)
 
     def __repr__(self):
         return f'<ParameterList created: {self.create_date} parameters: {self.parameter_date} {len(self.parameters)}>'
@@ -93,7 +101,7 @@ class Station(Base):
     :param str status: last status of station
     :param str latitude: latitude of station
     :param str longitude: longitude of station
-    :param list<ParamterList> parameters: list of parameters via parameterlist 
+    :param list<ParamterList> parameters: list of parameters via parameterlist
     """
     __tablename__ = 'stations'
     id = Column(Integer(), primary_key=True)
@@ -104,8 +112,17 @@ class Station(Base):
     time_stamp = Column(DateTime())
     status = Column(String(15))
     latitude = Column(String(20))
-    longitude = Column(String(20))    
+    longitude = Column(String(20))
     parameters = relationship('ParameterList', backref=backref('station'))
+
+    @property
+    def sorted_parameters(self):
+        """
+            List of parameters sorted by date.
+
+            :return sorted_params list[models.ParameterList]
+        """
+        return sorted(self.parameters, key=lambda k: k.parameter_date, reverse=True)
 
     def __repr__(self):
         return f'<Station {self.station_id} {self.station_name}>'
@@ -146,3 +163,37 @@ class Subscriber(Base):
                 'auth': self.auth
             }
         }
+
+    def get_station(self, station_id, *args, **kwargs):
+        return Station.query.filter_by(station_id=station_id).first()
+
+    def notification_data(self, param=['PM25', 'PM10']):
+        """
+            Generate notification dict for the subscriber. 
+        """
+        
+        self.get_station(self.station_id)
+        latest_params = station.sorted_parameters[0]
+
+        params_list = []
+        for param_name in param:
+            param_data = latest_params.get_param(param_name)
+            if param_data is not None:
+                params_list.append(param_data)
+            
+        title_param = params_list[0]
+        
+        title_string = f'{title_param.name} | {title_param.value}'
+        body_string = ''
+        
+        for param_val in params_list:
+            body_string += f'{param_val.name} | {param_val.value}\n'
+            
+        notification = {
+            'title': title_string,
+            'body': body_string
+        }
+
+        return notification
+
+        

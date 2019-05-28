@@ -45,7 +45,7 @@ class AllStationsResource(Resource):
                 'time_stamp': str(station.time_stamp),
             } for station in stations
         ]
-        return stations_json       
+        return stations_json
 
 class StationResource(Resource):
     """
@@ -60,9 +60,7 @@ class StationResource(Resource):
             return json
         """
         station = api_handler.get_station(station_id=station_id)
-        parameters = station.parameters
-        sorted_params = sorted(parameters, key=lambda k: k.parameter_date, reverse=True)
-        latest_param_data = sorted_params[0].serialize
+        latest_param_data = station.sorted_parameters[0].serialize
 
         station_json = {
             'station_id': station.station_id,
@@ -85,7 +83,7 @@ class PushNotificationResource(Resource):
     root_post_parser.add_argument('email', location='json')
     root_post_parser.add_argument('notify_time', location='json')
     root_post_parser.add_argument('subscription', type=dict, location='json')
-    
+
     # subscription_info_parser = reqparse.RequestParser()
     # subscription_info_parser.add_argument('endpoint', location=('subscription',) )
     # subscription_info_parser.add_argument('keys', type='dict', location=('subscription',))
@@ -101,7 +99,7 @@ class PushNotificationResource(Resource):
             setup background job to send notifications
             return response or error
         """
-        root_args = self.root_post_parser.parse_args() 
+        root_args = self.root_post_parser.parse_args()
         # subscription_args = self.subscription_info_parser.parse_args(req=root_args)
         # key_args = self.key_arg_parser.parse_args(req=subscription_args)
 
@@ -119,7 +117,7 @@ class PushNotificationResource(Resource):
 
         sub_endpoint = get_subscriber(endpoint=endpoint)
         sub_email = get_subscriber(email=email)
-        
+
         if sub_endpoint.count() > 0:
             return {
                 'error': 'Subscription already exists for this device.'
@@ -128,7 +126,7 @@ class PushNotificationResource(Resource):
             return {
                 'error': 'Subscription already exists for this email.'
             }, 400
-        
+
         data = {
             'station_id': station_id,
             'email': email,
@@ -146,7 +144,7 @@ class PushNotificationResource(Resource):
             }, 400
 
         return {
-            'station_id': subscriber.station_id, 
+            'station_id': subscriber.station_id,
             'email': email,
             'notify_time': subscriber.notify_time.strftime('%H:%M')
         }

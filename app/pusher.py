@@ -61,11 +61,11 @@ class Pusher(object):
 
     def _send_payload(self, subscription_info, serialized_payload):
         """
-        send a serialized payload to a subscriber
+            send a serialized payload to a subscriber
 
-        :param dict subscription_info: subscription dict from frontend susbcripiton 
-                    { "endpoint": "...", "keys": {"p256dh": "..", "auth": ".."} }
-        :param str serialized_payload: payload to send via push message, serialize data  
+            :param dict subscription_info: subscription dict from frontend susbcripiton 
+                        { "endpoint": "...", "keys": {"p256dh": "..", "auth": ".."} }
+            :param str serialized_payload: payload to send via push message, serialize data  
         """
         print(serialized_payload)
         webpush(
