@@ -1,6 +1,6 @@
 # Pollunator
 
-Real Time Local Pollution Data from CPCB CAAQMS. Currently hosted at [https://evlzctf.in](https://evlzctf.in).
+Real Time Local Pollution Data from CPCB CAAQMS. Previously hosted at [https://evlzctf.in](https://evlzctf.in).
 
 ## Features
 - REST API for accessing pollutant data
