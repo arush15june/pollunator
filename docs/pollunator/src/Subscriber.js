@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
+import Card from 'react-bootstrap/Card'
 
 import { getPublicKeyArray } from './Helpers'
 import { SUBSCRIBE_URL } from './API'
@@ -100,6 +101,7 @@ class Subscriber extends Component {
           <Button variant="primary" type="submit">
             Get Notified Daily!
           </Button>
+          { <Card.Text>{this.state.subscriptionResponse.error}</Card.Text> ? 'error' in this.state.subscriptionResponse : <React.Fragment></React.Fragment>}
         </Form>
       </React.Fragment>
     )

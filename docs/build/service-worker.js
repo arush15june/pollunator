@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/precache-manifest.8ec0e7c2558fb7f90d95e577bc88c780.js"
+  "/precache-manifest.3e6e98e8faa1be61fb080e439091e3e4.js"
 );
 
 workbox.clientsClaim();
@@ -33,10 +33,10 @@ workbox.routing.registerNavigationRoute("/index.html", {
   blacklist: [/^\/_/,/\/[^\/]+\.[^\/]+$/],
 });
 self.addEventListener('push', (event) => {
-   const push_message = event.data.json()
-   const title = push_message.title
-   console.log(push_message)
-   const promiseChain = self.registration.showNotification(title, push_message.       options)
+  const push_message = event.data.json()
+  const title = push_message.title
+  console.log(push_message)
+  const promiseChain = self.registration.showNotification(title, push_message.       options)
 
-   event.waitUntil(promiseChain)
- })
+  event.waitUntil(promiseChain)
+})
