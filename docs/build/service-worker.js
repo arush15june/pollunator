@@ -40,4 +40,3 @@ self.addEventListener('push', (event) => {
 
    event.waitUntil(promiseChain)
  })
-

@@ -55,9 +55,10 @@ class PollutionAPIWrapper():
             api.get_station_data
             and update database.
 
-            kwargs:
+
+            kwargs station_id str: station id to get data for.
                 kwargs for filter_by
-                filter by site_id
+                filter by station_id
 
                 - Check if the station is to be updated
                   via kwargs.get('update')
@@ -84,22 +85,21 @@ class PollutionAPIWrapper():
         # Get station from database using filter_by
         station = models.Station.query.filter_by(**kwargs).first()
         
-        # Get station_id
-        station_id = station.station_id
-
         # Verify if the address is not N/A.
         if station.address == 'N/A':
             UPDATE_STATION = True
 
-        station_timestamp_30min_delta = station.time_stamp - datetime.timedelta(minutes=30) 
-        current_time_delta = datetime.datetime.utcnow() - datetime.timedelta(minutes=30)
+        station_timestamp_delta_30min = station.time_stamp + datetime.timedelta(minutes=30) 
+        current_time = datetime.datetime.utcnow()
 
-        if current_time_delta > station_timestamp_30min_delta:
+        if current_time > station_timestamp_delta_30min:
             UPDATE_STATION = True
 
         # Fetch New Data
         if UPDATE_STATION:
-            station_data = self.api.get_station_data(station_id)
+            # API Failure, return available station data.
+            station_data = self.api.get_station_data(station.station_id)
+
             station_instance = get_station(station_data)
         
             # Update Station Info
@@ -107,11 +107,12 @@ class PollutionAPIWrapper():
             station.time_stamp = station_instance.time_stamp
             station.status = station_instance.status
 
-            # Create ParameterList
-            parameter_model_list = [models.Parameter(**parameter.get_dict()) for parameter in station_instance.parameters]
-            parameter_list = models.ParameterList(parameters=parameter_model_list, parameter_date=station_instance.parameters[0].date)
-            
-            station.parameters.append(parameter_list)
+            if len(getattr(station_instance, 'parameters', [])) > 0:
+                # Create ParameterList
+                parameter_model_list = [models.Parameter(**parameter.get_dict()) for parameter in station_instance.parameters]
+                parameter_list = models.ParameterList(parameters=parameter_model_list, parameter_date=station_instance.parameters[0].date)
+
+                station.parameters.append(parameter_list)
 
             # Commit to database, Rollback if commit fails
             try:

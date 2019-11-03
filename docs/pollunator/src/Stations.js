@@ -20,15 +20,7 @@ class StationsContainer extends Component {
       selectedStation: {}
     }
   }
-
-  async fetchStationData(station_id) {
-    let API_URL = `${STATIONS_URL}/${station_id}`
-    let station_data_request = await fetch(API_URL);
-    let station_data_json = await station_data_request.json()
-
-    return station_data_json
-  }
-
+  
   getStationFromStationId(station_id) {
     let station_el = this.state.stationList.filter( st =>
       st.station_id === station_id
@@ -38,6 +30,20 @@ class StationsContainer extends Component {
 
     return station_el
   }
+
+  async fetchStationData(station_id) {
+    let API_URL = `${STATIONS_URL}/${station_id}`
+    let station_data_request = await fetch(API_URL)
+    let station_data_json = await station_data_request.json()
+    
+    // Fallback to stationList
+    if (station_data_request.status !== 200) {
+      station_data_json = this.getStationFromStationId(station_id)
+    }
+
+    return station_data_json
+  }
+
 
   async setUserCoordinates() {
     const geolocation = navigator.geolocation
@@ -71,14 +77,16 @@ class StationsContainer extends Component {
     return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2))
   }
 
-  async setStationOnEuclideanDistance() {
-    if (this.state.coords.length !== 0 && this.state.stationList.length !== 0) {
-      let lat = this.state.coords.coords.latitude
-      let long = this.state.coords.coords.longitude
+async setStationOnEuclideanDistance() {
+  let lat, long;
+  if (this.state.coords.length !== 0 && this.state.stationList.length !== 0) {
+    lat = this.state.coords.coords.latitude
+    long = this.state.coords.coords.longitude
+  }
 
-      let mh = new MinHeap(this.state.stationList.length, (station) => {
-        return station.distance
-      })
+  let mh = new MinHeap(this.state.stationList.length, (station) => {
+      return station.distance
+  })
 
   for (let i = 0; i < this.state.stationList.length; i++) {
     let station = this.state.stationList[i]
@@ -99,16 +107,16 @@ class StationsContainer extends Component {
 
   await this.setSelectedStationFromIndex(0)
 }
-}
 
 async fetchStations() {
-let stationsRequest = await fetch(STATIONS_URL)
-let stationsData = await stationsRequest.json()
+  let stationsRequest = await fetch(STATIONS_URL)
+  let stationsData = await stationsRequest.json()
 
-this.setState({
-    stationList: stationsData
-  }
-)
+  this.setState({
+      stationList: stationsData,
+      selectedStation: stationsData[0]
+    }
+  )
 }
 
 async setSelectedStationFromStation(station) {
@@ -126,8 +134,8 @@ async setSelectedStationFromIndex(index) {
 
 async componentDidMount() {
   await this.fetchStations()
-  await this.setSelectedStationFromIndex(0)
   await this.setUserCoordinates()
+  await this.setSelectedStationFromIndex(0)
 }
 
 render() {

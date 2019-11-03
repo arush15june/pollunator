@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import Card from 'react-bootstrap/Card'
+import Moment from 'react-moment'
 
 class Parameter extends Component {
   render() {
@@ -14,7 +15,7 @@ class Parameter extends Component {
               
             </Card.Text>
             <Card.Text>
-              {param.date}
+              <Moment>{param.date}</Moment>
             </Card.Text>
           </Card.Body>
         </Card>                                                     

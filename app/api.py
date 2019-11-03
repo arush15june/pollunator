@@ -17,7 +17,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 GET_STATION_PARAMETER_TIMESTAMP_FORMAT = '%d %b %Y, %H:%M' # 05 Mar 2019, 23:15
 GET_STATION_INFO_TIMESTAMP_FORMAT = '%d %b %Y %H:%M' # 05 Mar 2019 23:15
 
-string_to_datetime = (lambda time_string: dateutil.parser.parse(time_string).replace(tzinfo=tz.gettz('Asia/Kolkata')) )
+string_to_datetime = (lambda time_string: dateutil.parser.parse(time_string) )
 datetime_to_string = (lambda timestamp, format: timestamp.strftime(format))
 
 class PollutionAPI(object):
@@ -126,19 +126,25 @@ class PollutionAPI(object):
             },
 
     """
+    UA = '''Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'''
+    
     URL = 'https://app.cpcbccr.com'
 
-    ALL_STATIONS_URI = {
+    DEFAULT_HEADERS = {
+        'User-Agent': UA
+    }
+
+    ALL_STATIONS_RESOURCE = {
         'URI': '/caaqms/caaqms_landing_map_all',
         'POST_DATA': 'eyJyZWdpb24iOiJsYW5kaW5nX2Rhc2hib2FyZCJ9'
     }
 
-    STATION_VIEW_DATA_URI = {
+    STATION_VIEW_DATA_RESOURCE = {
         'URI': '/caaqms/caaqms_viewdata_v2',
         'POST_DATA': (lambda site_id: base64.b64encode(f'''{{"site_id":"{site_id}","user_id":"user_211","user_name":"KSPCB","user_role":"Admin","org":["KSPCB"]}}'''.encode()).decode())
     }
 
-    STATION_DELTA_DATA_URI = {
+    STATION_DELTA_DATA_RESOURCE = {
         'URI': '/caaqms/caaqms_load_delta_v2',
         'POST_DATA': (lambda site_id, delta, time_stamp: base64.b64encode(f'''{{"delta":"{delta}","time_stamp":"{time_stamp}","site_id":"{site_id}"}}'''.encode()).decode())
     }
@@ -148,10 +154,22 @@ class PollutionAPI(object):
         self.stations = {}
 
     def _get(self, URI, *args, **kwargs):
-        return requests.get(self.URL+URI, verify=False, *args, **kwargs)
+        headers = kwargs.pop('headers', None)
+        if headers is None:
+            headers = self.DEFAULT_HEADERS
+        else:
+            headers.update(self.DEFAULT_HEADERS)
+
+        return requests.get(self.URL+URI, headers=headers, verify=False, *args, **kwargs)
 
     def _post(self, URI, *args, **kwargs):
-        return requests.post(self.URL+URI, verify=False, *args, **kwargs)
+        headers = kwargs.pop('headers', None)
+        if headers is None:
+            headers = self.DEFAULT_HEADERS
+        else:
+            headers.update(self.DEFAULT_HEADERS)
+        
+        return requests.post(self.URL+URI, headers=headers, verify=False, *args, **kwargs)
 
     def get_all_stations(self, *args, **kwargs):
         """
@@ -159,8 +177,12 @@ class PollutionAPI(object):
 
             return dict station: `/caaqms/caaqms_landing_map_all` JSON Response
         """
-        payload = self.ALL_STATIONS_URI['POST_DATA']
-        request = self._post(self.ALL_STATIONS_URI['URI'], data=payload)
+        payload = self.ALL_STATIONS_RESOURCE['POST_DATA']
+        request = self._post(
+            self.ALL_STATIONS_RESOURCE['URI'], 
+            data=payload
+        )
+        
         json_data = request.json()
         stations = json_data['map']['station_list']
 
@@ -177,11 +199,13 @@ class PollutionAPI(object):
             'parameters': <parameters>
         }
         """
-        payload = self.STATION_VIEW_DATA_URI['POST_DATA'](site_id)
-        request = self._post(self.STATION_VIEW_DATA_URI['URI'], data=payload)
+        payload = self.STATION_VIEW_DATA_RESOURCE['POST_DATA'](site_id)
+        request = self._post(
+            self.STATION_VIEW_DATA_RESOURCE['URI'], 
+            data=payload
+        )
 
         json_data = request.json()
-
         site_info_key = 'siteInfo'
         table_data_key = 'tableData'
         body_content_key = 'bodyContent'
@@ -197,8 +221,8 @@ class PollutionAPI(object):
     #     """
     #         get historical data based on delta.
     #     """
-    #     payload = self.STATION_VIEW_DATA_URI['POST_DATA'](site_id, delta, time_stamp)
-    #     request = self._post(self.STATION_VIEW_DATA_URI['URI'], data=payload)
+    #     payload = self.STATION_VIEW_DATA_RESOURCE['POST_DATA'](site_id, delta, time_stamp)
+    #     request = self._post(self.STATION_VIEW_DATA_RESOURCE['URI'], data=payload)
 
     #     json_data = request.json()
 
@@ -288,11 +312,16 @@ class Station(object):
         self.station_id = kwargs.get('station_id', 'site_-1')
         self.address = kwargs.get('address', 'N/A')
 
-        time_stamp_string = kwargs.get('time_stamp', datetime.datetime.utcnow())
-        self.time_stamp = string_to_datetime(time_stamp_string)
+        time_stamp_string = kwargs.get('time_stamp', None)
+        if None:
+            self.time_stamp = datetime.datetime.utcnow()
+        else:
+            self.time_stamp = string_to_datetime(time_stamp_string)
+            self.time_stamp = self.time_stamp.replace(tzinfo=tz.gettz('Asia/Kolkata')).astimezone(tz.UTC)
 
         parameters_list = kwargs.get('parameters', [])
-        self.parameters = [Parameter(**parameter_dict) for parameter_dict in parameters_list ]
+        if len(parameters_list) > 0:
+            self.parameters = [Parameter(**parameter_dict) for parameter_dict in parameters_list ]
 
         self.status = kwargs.get('status', 'N/A')
 
