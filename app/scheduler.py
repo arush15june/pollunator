@@ -65,7 +65,7 @@ def schedule_registration_notif(subscriber, *args, **kwargs):
         :kwargs seconds: seconds to enqueue notification in.
     """
     queue_time = kwargs.pop('seconds', 5)
-    job_time = timedelta(seconds=kwargs.pop(queue_time))
+    job_time = timedelta(seconds=queue_time)
     
     notification_data = generate_registration_notification_payload(subscriber)
 
