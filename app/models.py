@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, Float, String, ForeignKey, DateTime, Boolean
 import datetime
 from sqlalchemy.orm import relationship, backref
+import dateutil.tz as tz
 from database import Base
 
 class Parameter(Base):
@@ -175,18 +176,18 @@ class Subscriber(Base):
         station = self.get_station()
         latest_params = station.sorted_parameters[0]
 
-        params_list = []
-        for param_name in param:
-            param_data = llatest_params.get_param(param_name)
-            if param_data is not None:
-                params_list.append(param_data)
+        # params_list = []
+        # for param_name in param:
+        #     param_data = latest_params.get_param(param_name)
+        #     if param_data is not None:
+        #         params_list.append(param_data)
             
         title_string = f'{station.station_name}\n'
-        body_string = f'Date: {station.time_stamp}\n'
+        body_string = f'Date: {station.time_stamp.astimezone(tz.gettz("Asia/Kolkata"))}\n'
         body_string += ''.join(
             [ 
                 f'{param_val.name} | {param_val.value}\n'
-                for param_val in params_list
+                for param_val in latest_params.parameters
             ]
         )
             

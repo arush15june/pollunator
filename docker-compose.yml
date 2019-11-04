@@ -27,6 +27,16 @@ services:
     image: redis:5.0
     networks:
       - web_nw
+  rq-scheduler:
+    build: .
+    command: "/bin/bash /deploy/app/rq-entrypoint.sh"
+    working_dir: /deploy/app
+    depends_on:
+      - app
+    volumes:
+      - './app/:/deploy/app/'
+    networks:
+      - web_nw
       
 networks:
   web_nw:
