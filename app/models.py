@@ -186,7 +186,7 @@ class Subscriber(Base):
         body_string += ''.join(
             [ 
                 f'{param_val.name} | {param_val.value}\n'
-                for param_val in latest_params
+                for param_val in latest_params.parameters
             ]
         )
             
