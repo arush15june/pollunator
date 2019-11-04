@@ -10,19 +10,23 @@
 from redis import Redis
 from rq import Queue
 from rq_scheduler import Scheduler
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from pusher import Pusher
+from subscriber import generate_registration_notif_payload
+
+REDIS_HOST = os.getenv('RQ_REDIS_HOST', 'redis')
+REDIS_PORT = os.getenv('RQ_REDIS_HOST', 6379)
 
 class RedisConnectionError(Exception):
     pass
 
 try:
-    scheduler = Scheduler('pollunator_subscribers', connection=Redis())
+    scheduler = Scheduler('pollunator_subscribers', connection=Redis(host=REDIS_HOST, port=REDIS_PORT))
 except:
     raise RedisConnectionError()
 
-def schedule_subscriber_hourly(subscriber, hours=24, *args, **kwargs):
+def schedule_subscriber(subscriber, hours=24, *args, **kwargs):
     job_time = datetime.timedelta(hours=hours)
 
     if subscriber.notify_time > datetime.utcnow():
@@ -30,17 +34,36 @@ def schedule_subscriber_hourly(subscriber, hours=24, *args, **kwargs):
     else:
         job_time += subscriber.notify_time
         
-    notification_data = subscriber.notification_data
+    notification_data = subscriber.notification_data()
 
     scheduler.schedule(
         scheduled_time=job_time, # Time for first execution, in UTC timezone
         func=send_notification,                     # Function to be queued
         args=[subscriber],             # Arguments passed into function when executed
         kwargs=notification_data,         # Keyword arguments passed into function when executed
-        interval=60,                   # Time before the function is called again, in seconds
+        interval=hours*60*60,                   # Time before the function is called again, in seconds
         repeat=None                   # Repeat this number of times (None means repeat forever)
     )
 
+def schedule_registration_notif(subscriber, *args, **kwargs):
+    """ 
+        Schedule to send a notification once.
+
+        :param models.Subscriber subscriber: subscriber to send notification to.
+        :kwargs seconds: seconds to enqueue notification in.
+    """
+    queue_time = kwargs.pop('seconds', 5)
+    job_time = timedelta(seconds=kwargs.pop(queue_time))
+    
+    notification_data = generate_registration_notif_payload(subscriber)
+
+    scheduler.enqueue_in(
+        job_time,
+        func=send_notification,                     
+        args=[subscriber],
+        kwargs=notification_data,    
+    )
+    
 
 def send_notification(subscriber, *args, **kwargs):
     """
@@ -54,6 +77,11 @@ def send_notification(subscriber, *args, **kwargs):
     try:
         pusher = Pusher()
         pusher.send_notification(subscription_info, **kwargs)
-        return True
     except:
         return False
+
+        return True
+
+def send_pollution_notification(subscriber):
+    options = generate_notification_payload(subscriber)
+    send_pollution_notification(subscriber, **options)

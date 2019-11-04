@@ -4,7 +4,7 @@ certifi==2018.11.29
 cffi==1.12.2
 chardet==3.0.4
 Click==7.0
-croniter==0.3.30
+croniter==0.3.29
 cryptography==2.6.1
 Flask==1.0.2
 Flask-Cors==3.0.7

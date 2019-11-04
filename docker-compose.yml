@@ -6,6 +6,8 @@ services:
     working_dir: /deploy/app
     volumes:
       - './app/:/deploy/app/'
+    depends_on:
+      - redis
     networks:
       - web_nw
   nginx:
@@ -21,6 +23,10 @@ services:
       - app
     networks:
       - web_nw
+  redis:
+    image: redis:5.0
+    networks:
+      - web_nw
+      
 networks:
   web_nw:
-    driver: bridge

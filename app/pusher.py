@@ -14,7 +14,6 @@ import os
 import json
 from pywebpush import webpush, WebPushException
 
-
 DEFAULT_APP_SERVER_KEY = 'BCj6Yxzs5j-zKTzHIrWAAczNCyc_iHht8u_p4Rqw53nOVIebj6a_rIDRBC7Zkj6WpOsr8s8yj8Gg60jjWOu8UqM'
 DEFAULT_PRIVATE_KEY_PATH = './private_key.pem'
 DEFAULT_PUBLIC_KEY_PATH = './public_key.pem'
@@ -40,6 +39,7 @@ class Pusher(object):
         title = kwargs.pop('title', self.NOTIF_TITLE)
         body = kwargs.pop('body', self.NOTIF_BODY)
 
+        # Default notification payload.
         notif_dict = {
             'title': title,
             'options': {
@@ -56,7 +56,6 @@ class Pusher(object):
 
     @staticmethod
     def _serialize(data):
-        print(data)
         return json.dumps(data)
 
     def _send_payload(self, subscription_info, serialized_payload):
@@ -87,8 +86,6 @@ class Pusher(object):
 
         """
         notification_dict = self._create_notification_dict(**kwargs)
-        print(notification_dict)
         payload = self._serialize(notification_dict)
-        print(payload)
 
         self._send_payload(subscription_info, payload)

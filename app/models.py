@@ -164,30 +164,31 @@ class Subscriber(Base):
             }
         }
 
-    def get_station(self, station_id, *args, **kwargs):
-        return Station.query.filter_by(station_id=station_id).first()
+    def get_station(self, *args, **kwargs):
+        return Station.query.filter_by(station_id=self.station_id).first()
 
     def notification_data(self, param=['PM25', 'PM10']):
         """
             Generate notification dict for the subscriber. 
         """
         
-        self.get_station(self.station_id)
+        station = self.get_station()
         latest_params = station.sorted_parameters[0]
 
         params_list = []
         for param_name in param:
-            param_data = latest_params.get_param(param_name)
+            param_data = llatest_params.get_param(param_name)
             if param_data is not None:
                 params_list.append(param_data)
             
-        title_param = params_list[0]
-        
-        title_string = f'{title_param.name} | {title_param.value}'
-        body_string = ''
-        
-        for param_val in params_list:
-            body_string += f'{param_val.name} | {param_val.value}\n'
+        title_string = f'{station.station_name}\n'
+        body_string = f'Date: {station.time_stamp}\n'
+        body_string += ''.join(
+            [ 
+                f'{param_val.name} | {param_val.value}\n'
+                for param_val in params_list
+            ]
+        )
             
         notification = {
             'title': title_string,
@@ -195,5 +196,3 @@ class Subscriber(Base):
         }
 
         return notification
-
-        

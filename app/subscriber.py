@@ -1,12 +1,15 @@
 import dateutil.parser
 from datetime import datetime
 
-from models import Subscriber
+from models import Subscriber, Station
 from database import init_db, db_session
-
 from scheduler import schedule_subscriber_hourly
+from pusher import Pusher
 
 NOTIFICATION_REPEAT_HOURS = 24
+REGISTRATION_NOTIFICATION_BODY = 'You will receive daily notifications for your selected air quality monitoring station\n' 
+
+push_instance = Push()
 
 def get_subscriber(*args, **kwargs):
     return Subscriber.query.filter_by(**kwargs)
@@ -53,12 +56,30 @@ def add_subscriber(*args, **kwargs):
         db_session.rollback()
         raise InvalidSubscriberInputError()
 
+    queue_registration_notification(subscriber)
     set_notification_job(subscriber)
 
     return subscriber
 
 def set_notification_job(subscriber):
     """
+        Queue the notification job for subscriber.
+
         :param models.Subscriber subscriber: models.Subscriber instance
     """
-    pass
+    scheduler.schedule_subscriber(subscriber, hours=NOTIFICATION_REPEAT_HOURS)
+
+def queue_registration_notification(subscriber):
+    scheduler.schedule_registration_notif(subscriber)
+
+def generate_registration_notif_payload(subscriber):
+    """ 
+        Generate payload for registration WebPush notification.
+
+        :param models.Subscriber subscriber: models.Subscriber instance
+    """
+    station = subscriber.get_station()
+    notification_options = {
+        'title': f'Registered for {station.station_name}'
+        'body': REGISTRATION_NOTIFICATION_BODY
+    }
