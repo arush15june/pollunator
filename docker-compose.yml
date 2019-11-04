@@ -18,7 +18,7 @@ services:
     environment:
       - net.ipv6.conf.all.forwarding=1 
     ports:
-      - "8083:80"
+      - "80:80"
     depends_on:
       - app
     networks:
