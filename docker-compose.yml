@@ -29,7 +29,7 @@ services:
       - web_nw
   rq-scheduler:
     build: .
-    command: "rqscheduler --host ${REDIS_HOST:-redis} -i 5"
+    command: "rqscheduler --host ${REDIS_HOST:-redis} -i 5 & rq worker pollunator_subscribers"
     working_dir: /deploy/app
     depends_on:
       - app
