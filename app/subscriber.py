@@ -80,6 +80,6 @@ def generate_registration_notif_payload(subscriber):
     """
     station = subscriber.get_station()
     notification_options = {
-        'title': f'Registered for {station.station_name}'
+        'title': f'Registered for {station.station_name}',
         'body': REGISTRATION_NOTIFICATION_BODY
     }
