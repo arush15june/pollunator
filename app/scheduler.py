@@ -76,8 +76,8 @@ def schedule_registration_notif(subscriber, *args, **kwargs):
     scheduler.enqueue_in(
         job_time,
         send_notification,                     
-        args=[subscriber],
-        kwargs=notification_data,    
+        subscriber,
+        **notification_data,    
     )
     
 def send_notification(subscriber, *args, **kwargs):
