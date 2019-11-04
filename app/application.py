@@ -136,12 +136,12 @@ class PushNotificationResource(Resource):
             'auth': auth
         }
 
-        try:
-            subscriber = add_subscriber(**data)
-        except:
-            return {
-                'error': 'Could subscribe user'
-            }, 400
+        # try:
+        subscriber = add_subscriber(**data)
+        # except:
+        #     return {
+        #         'error': 'Could subscribe user'
+        #     }, 400
 
         return {
             'station_id': subscriber.station_id,
