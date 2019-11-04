@@ -177,7 +177,7 @@ class Subscriber(Base):
 
         params_list = []
         for param_name in param:
-            param_data = llatest_params.get_param(param_name)
+            param_data = latest_params.get_param(param_name)
             if param_data is not None:
                 params_list.append(param_data)
             
