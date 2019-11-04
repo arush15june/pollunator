@@ -18,13 +18,23 @@ services:
     environment:
       - net.ipv6.conf.all.forwarding=1 
     ports:
-      - "80:80"
+      - "8083:80"
     depends_on:
       - app
     networks:
       - web_nw
   redis:
     image: redis:5.0
+    networks:
+      - web_nw
+  rq-scheduler:
+    build: .
+    command: "rqscheduler --host ${REDIS_HOST:-redis}"
+    working_dir: /deploy/app
+    depends_on:
+      - app
+    volumes:
+      - './app/:/deploy/app/'
     networks:
       - web_nw
       
