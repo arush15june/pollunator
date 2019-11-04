@@ -183,7 +183,7 @@ class Subscriber(Base):
         #         params_list.append(param_data)
             
         title_string = f'{station.station_name}\n'
-        body_string = f'Date: {station.time_stamp.astimzone(tz.gettz('Asia/Kolkata'))}\n'
+        body_string = f'Date: {station.time_stamp.astimezone(tz.gettz("Asia/Kolkata"))}\n'
         body_string += ''.join(
             [ 
                 f'{param_val.name} | {param_val.value}\n'
