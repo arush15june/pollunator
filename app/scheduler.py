@@ -49,7 +49,7 @@ def schedule_subscriber(subscriber, hours=24, *args, **kwargs):
         job_time = subscriber.notify_time
     else:
         job_time += subscriber.notify_time
-        
+    
     notification_data = subscriber.notification_data()
 
     scheduler.schedule(

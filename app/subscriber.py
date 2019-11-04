@@ -1,5 +1,5 @@
 import dateutil.parser
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from models import Subscriber, Station
 from database import init_db, db_session
@@ -18,6 +18,7 @@ def transform_notify_time(notify_time):
         minute=notify_time.minute,
         second=notify_time.second
     )
+    curr_time -= timedelta(hours=5, minutes=30)
     return curr_time
 
 class InvalidSubscriberInputError(Exception):
