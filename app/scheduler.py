@@ -75,12 +75,11 @@ def schedule_registration_notif(subscriber, *args, **kwargs):
 
     scheduler.enqueue_in(
         job_time,
-        func=send_notification,                     
+        send_notification,                     
         args=[subscriber],
         kwargs=notification_data,    
     )
     
-
 def send_notification(subscriber, *args, **kwargs):
     """
         :param models.Subscriber subscriber: models.Subscriber instance
