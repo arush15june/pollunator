@@ -40,6 +40,8 @@ def generate_registration_notification_payload(subscriber):
         'body': REGISTRATION_NOTIFICATION_BODY
     }
 
+    return notification_options
+
 def schedule_subscriber(subscriber, hours=24, *args, **kwargs):
     job_time = datetime.timedelta(hours=hours)
 
