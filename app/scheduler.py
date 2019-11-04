@@ -6,6 +6,7 @@
 
     Notifications can be scheduled by the hour, default is 24 hours.
 """
+import os
 
 from redis import Redis
 from rq import Queue
@@ -13,7 +14,6 @@ from rq_scheduler import Scheduler
 from datetime import datetime, timedelta
 
 from pusher import Pusher
-from subscriber import generate_registration_notif_payload
 
 REDIS_HOST = os.getenv('RQ_REDIS_HOST', 'redis')
 REDIS_PORT = os.getenv('RQ_REDIS_HOST', 6379)
@@ -25,6 +25,18 @@ try:
     scheduler = Scheduler('pollunator_subscribers', connection=Redis(host=REDIS_HOST, port=REDIS_PORT))
 except:
     raise RedisConnectionError()
+
+def generate_registration_notification_payload(subscriber):
+    """ 
+        Generate payload for registration WebPush notification.
+
+        :param models.Subscriber subscriber: models.Subscriber instance
+    """
+    station = subscriber.get_station()
+    notification_options = {
+        'title': f'Registered for {station.station_name}',
+        'body': REGISTRATION_NOTIFICATION_BODY
+    }
 
 def schedule_subscriber(subscriber, hours=24, *args, **kwargs):
     job_time = datetime.timedelta(hours=hours)
@@ -55,7 +67,7 @@ def schedule_registration_notif(subscriber, *args, **kwargs):
     queue_time = kwargs.pop('seconds', 5)
     job_time = timedelta(seconds=kwargs.pop(queue_time))
     
-    notification_data = generate_registration_notif_payload(subscriber)
+    notification_data = generate_registration_notification_payload(subscriber)
 
     scheduler.enqueue_in(
         job_time,
