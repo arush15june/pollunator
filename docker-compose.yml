@@ -29,7 +29,7 @@ services:
       - web_nw
   rq-scheduler:
     build: .
-    entrypoint: "/deploy/rq-entrypoint.sh"
+    entrypoint: "/deploy/app/rq-entrypoint.sh"
     working_dir: /deploy/app
     depends_on:
       - app
