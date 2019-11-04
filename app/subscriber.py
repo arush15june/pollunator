@@ -7,7 +7,6 @@ from database import init_db, db_session
 import scheduler
 
 NOTIFICATION_REPEAT_HOURS = 24
-REGISTRATION_NOTIFICATION_BODY = 'You will receive daily notifications for your selected air quality monitoring station\n' 
 
 def get_subscriber(*args, **kwargs):
     return Subscriber.query.filter_by(**kwargs)

@@ -18,6 +18,8 @@ from pusher import Pusher
 REDIS_HOST = os.getenv('RQ_REDIS_HOST', 'redis')
 REDIS_PORT = os.getenv('RQ_REDIS_HOST', 6379)
 
+REGISTRATION_NOTIFICATION_BODY = 'You will receive daily notifications for your selected air quality monitoring station\n' 
+
 class RedisConnectionError(Exception):
     pass
 
