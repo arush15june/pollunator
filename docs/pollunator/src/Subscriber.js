@@ -2,6 +2,9 @@ import React, { Component } from 'react'
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Card from 'react-bootstrap/Card'
+import Row from 'react-bootstrap/Row'
+import Col from 'react-bootstrap/Col'
+import TimePicker from 'react-bootstrap-time-picker';
 
 import { getPublicKeyArray } from './Helpers'
 import { SUBSCRIBE_URL } from './API'
@@ -15,19 +18,21 @@ class Subscriber extends Component {
       permission: false,
       subscripton: {},
       subscriptionResponse: {},
+      notify_time: '09:00'
     }
   }
 
   async _push_subscription(subscription) {
     const email = this.state.email
     const station_id = this.props.station_id;
-    const notify_time = '09:00'
+    const notify_time = this.state.notify_time
 
     const subscribe_body = {
       station_id: station_id,
       notify_time: notify_time,
       email: email,
-      subscription: subscription
+      subscription: subscription,
+      notify_time: notify_time
     }
     
     const susbcribe_request = await fetch(SUBSCRIBE_URL, {
@@ -91,12 +96,29 @@ class Subscriber extends Component {
     await this.subscribe()
   }
 
+  _timeChangeHandler = (time) => {
+    let select_time = new Date(0, 0, 0, 0, 0, time, 0)
+    let hours = select_time.getHours()
+    let minutes = select_time.getMinutes()
+
+    this.setState({
+      notify_time: `${hours}:${minutes}`
+    })
+  }
+
   render() {
     return (
       <React.Fragment>
         <Form onSubmit={this.onSubmitHandler}>
           <Form.Group controlId="formEmail">
-            <Form.Control name='email' type="email" placeholder="Enter email" />
+            <Row>
+              <Col sm={3}>
+                <TimePicker onChange={this._timeChangeHandler} value={this.state.notify_time} />
+              </Col>
+              <Col>
+                <Form.Control name='email' type="email" placeholder="Enter email" />
+              </Col>
+            </Row>
           </Form.Group>
           <Button variant="primary" type="submit">
             Get Notified Daily!

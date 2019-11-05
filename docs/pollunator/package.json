@@ -7,6 +7,7 @@
     "moment": "^2.24.0",
     "react": "^16.8.4",
     "react-bootstrap": "^1.0.0-beta.5",
+    "react-bootstrap-time-picker": "^2.0.1",
     "react-dom": "^16.8.4",
     "react-map-gl": "^5.1.1",
     "react-moment": "^0.9.6",
