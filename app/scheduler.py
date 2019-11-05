@@ -43,7 +43,7 @@ def generate_registration_notification_payload(subscriber):
     return notification_options
 
 def schedule_subscriber(subscriber, hours=24, *args, **kwargs):
-    job_time = datetime.timedelta(hours=hours)
+    job_time = timedelta(hours=hours)
 
     if subscriber.notify_time > datetime.utcnow():
         job_time = subscriber.notify_time

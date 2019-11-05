@@ -140,7 +140,7 @@ class PushNotificationResource(Resource):
             subscriber = add_subscriber(**data)
         except:
             return {
-                'error': 'Could subscribe user'
+                'error': 'Couldn\'t subscribe user'
             }, 400
 
         return {
