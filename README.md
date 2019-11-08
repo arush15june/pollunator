@@ -14,7 +14,6 @@ Real Time Local Pollution Data from CPCB CAAQMS. Currently hosted at [https://ev
 
 
 ## Documentation
-### TODO
 
 ## TODO
 - Push notifications
